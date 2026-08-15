@@ -55,12 +55,7 @@ const DATA=[
 • 1 cartouche 50€• 5 paquet 30€ €",icon:"🍫",image:"",video:""},
 {name:"NOM DU PRODUIT 6",desc:"DESCRIPTION DU PRODUIT 6",price:"00 €",icon:"✨",image:"",video:""}]},
 {category:"🥳 Menu Fêtard",items:[
-{name:"",desc:"",price:"00 €",icon:"🎉",image:"",video:""},
-{name:"",desc:"",price:"00 €",icon:"🎁",image:"",video:""},
-{name:"",desc:"",price:"00 €",icon:"⭐",image:"",video:""},
-{name:"",desc:"",price:"00 €",icon:"🚀",image:"",video:""},
-{name:"N",desc:"",price:"00 €",icon:"💥",image:"",video:""},
-{name:"",desc:"",price:"00 €",icon:"🏆",image:"",video:""}]}];
+
 let active=0,cart=[];
 function init(){document.getElementById("tabs").innerHTML=DATA.map((c,i)=>`<button class="${i===0?"active":""}" onclick="selectCat(${i})">${c.category}</button>`).join("");render();updateCount()}
 function selectCat(i){active=i;document.querySelectorAll(".tabs button").forEach((b,n)=>b.classList.toggle("active",n===i));render()}
