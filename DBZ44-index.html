@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>DBZ44 — Menu</title><script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#070b12;--panel:#101925;--panel2:#172334;--text:#fff;--muted:#aab5c5;--orange:#ff8a00;--gold:#ffd21f;--line:#ffffff16}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#29384d 0,#0b111b 38%,#05080d 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:680px;margin:auto;padding:14px 15px 110px}.hero{padding:24px 20px;border:1px solid var(--line);border-radius:26px;background:linear-gradient(135deg,#151f2d,#0b111b);box-shadow:0 15px 40px #0008}
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#ff8a001f;color:var(--gold);font-size:12px;font-weight:900}.hero h1{margin:10px 0 5px;font-size:31px}.hero p{margin:0;color:var(--muted);line-height:1.45}
+.tabs{display:flex;gap:8px;overflow:auto;padding:16px 1px 3px}.tabs button{white-space:nowrap;border:1px solid var(--line);border-radius:15px;padding:11px 15px;background:var(--panel);color:#fff;font-weight:800}.tabs button.active{background:linear-gradient(135deg,var(--orange),#ffb000);color:#111;border-color:transparent}
+.section h2{font-size:21px;margin:18px 2px 12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{background:linear-gradient(180deg,#131e2c,#0e1722);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 8px 25px #0005}
+.media{aspect-ratio:1/1;background:linear-gradient(135deg,#202d3f,#0d141e);display:flex;align-items:center;justify-content:center;font-size:46px}.media img,.media video{width:100%;height:100%;object-fit:cover;display:block}.body{padding:13px}.body h3{margin:0 0 5px;font-size:16px}.desc{margin:0;color:var(--muted);font-size:12px;line-height:1.4;min-height:34px}.price{display:block;margin:10px 0;color:var(--gold);font-size:17px;font-weight:900}
+.add{width:100%;border:0;border-radius:13px;padding:11px;background:linear-gradient(135deg,#ff8a00,#ffb000);color:#111;font-weight:900}.bottom{position:fixed;left:0;right:0;bottom:0;padding:11px 15px calc(11px + env(safe-area-inset-bottom));background:#070b12e8;backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.cartbtn{width:100%;border:0;border-radius:17px;padding:15px;background:linear-gradient(135deg,var(--orange),var(--gold));color:#111;font-size:16px;font-weight:950}.modal{display:none;position:fixed;inset:0;background:#000b;align-items:flex-end;z-index:10}.sheet{width:100%;max-width:680px;margin:auto;background:#101925;border-radius:25px 25px 0 0;padding:20px;max-height:86vh;overflow:auto;border:1px solid var(--line)}
+.close{float:right;border:0;border-radius:11px;background:var(--panel2);color:#fff;padding:8px 11px}.sheet h2{margin:0 0 16px}.row{display:flex;justify-content:space-between;gap:10px;padding:13px 0;border-bottom:1px solid var(--line)}.empty{color:var(--muted)}.clear{margin-top:14px;width:100%;padding:12px;border:1px solid var(--line);background:transparent;color:#fff;border-radius:13px}.note{text-align:center;color:var(--muted);font-size:11px;margin:18px 0}
+@media(max-width:420px){.grid{grid-template-columns:1fr}.hero h1{font-size:28px}}
+</style></head>
+<body>
+<main class="wrap"><section class="hero"><span class="badge">⚡ DBZ44 • POWER MENU</span><h1>🔥 DBZ44</h1><p>Bienvenue dans ton menu. Choisis une catégorie et découvre les produits.</p></section>
+<nav class="tabs" id="tabs"></nav><section><h2 id="categoryTitle"></h2><div class="grid" id="products"></div></section>
+<p class="note">Modifie les champs NOM, DESCRIPTION, PRIX, PHOTO et VIDÉO dans la section DATA.</p></main>
+<div class="bottom"><button class="cartbtn" onclick="openCart()">🛒 Panier • <span id="count">0</span> article(s)</button></div>
+<div class="modal" id="modal" onclick="if(event.target===this)closeCart()"><div class="sheet"><button class="close" onclick="closeCart()">Fermer</button><h2>🛒 Ton panier</h2><div id="cartList"></div><button class="clear" onclick="clearCart()">Vider le panier</button></div></div>
+<script>
+/* ===== MODIFIE CETTE PARTIE =====
+name=NOM, desc=DESCRIPTION, price=PRIX
+image=PHOTO, ex. "images/produit.jpg"
+video=VIDÉO, ex. "videos/produit.mp4"
+Utilise uniquement des produits légaux.
+*/
+const DATA=[
+{category:"🍫 Menu Chocolat",items:[
+{name:"NOM DU PRODUIT 1",desc:"DESCRIPTION DU PRODUIT 1",price:"00 €",icon:"🍫",image:"",video:""},
+{name:"NOM DU PRODUIT 2",desc:"DESCRIPTION DU PRODUIT 2",price:"00 €",icon:"🍫",image:"",video:""},
+{name:"NOM DU PRODUIT 3",desc:"DESCRIPTION DU PRODUIT 3",price:"00 €",icon:"⭐",image:"",video:""},
+{name:"NOM DU PRODUIT 4",desc:"DESCRIPTION DU PRODUIT 4",price:"00 €",icon:"🎁",image:"",video:""},
+{name:"NOM DU PRODUIT 5",desc:"DESCRIPTION DU PRODUIT 5",price:"00 €",icon:"🍫",image:"",video:""},
+{name:"NOM DU PRODUIT 6",desc:"DESCRIPTION DU PRODUIT 6",price:"00 €",icon:"✨",image:"",video:""}]},
+{category:"🥳 Menu Fêtard",items:[
+{name:"NOM DU PRODUIT 1",desc:"DESCRIPTION DU PRODUIT 1",price:"00 €",icon:"🎉",image:"",video:""},
+{name:"NOM DU PRODUIT 2",desc:"DESCRIPTION DU PRODUIT 2",price:"00 €",icon:"🎁",image:"",video:""},
+{name:"NOM DU PRODUIT 3",desc:"DESCRIPTION DU PRODUIT 3",price:"00 €",icon:"⭐",image:"",video:""},
+{name:"NOM DU PRODUIT 4",desc:"DESCRIPTION DU PRODUIT 4",price:"00 €",icon:"🚀",image:"",video:""},
+{name:"NOM DU PRODUIT 5",desc:"DESCRIPTION DU PRODUIT 5",price:"00 €",icon:"💥",image:"",video:""},
+{name:"NOM DU PRODUIT 6",desc:"DESCRIPTION DU PRODUIT 6",price:"00 €",icon:"🏆",image:"",video:""}]}];
+let active=0,cart=[];
+function init(){document.getElementById("tabs").innerHTML=DATA.map((c,i)=>`<button class="${i===0?"active":""}" onclick="selectCat(${i})">${c.category}</button>`).join("");render();updateCount()}
+function selectCat(i){active=i;document.querySelectorAll(".tabs button").forEach((b,n)=>b.classList.toggle("active",n===i));render()}
+function render(){const g=DATA[active];document.getElementById("categoryTitle").textContent=g.category;document.getElementById("products").innerHTML=g.items.map((p,i)=>{let m=p.video?`<video src="${p.video}" muted playsinline loop autoplay controls></video>`:p.image?`<img src="${p.image}" alt="${p.name}">`:`<div>${p.icon||"📦"}</div>`;return `<article class="card"><div class="media">${m}</div><div class="body"><h3>${p.name}</h3><p class="desc">${p.desc}</p><span class="price">${p.price}</span><button class="add" onclick="addToCart(${active},${i})">＋ Ajouter</button></div></article>`}).join("")}
+function addToCart(c,i){const p=DATA[c].items[i];cart.push({name:p.name,price:p.price});updateCount();if(window.Telegram?.WebApp)Telegram.WebApp.showAlert(`${p.name} a été ajouté au panier.`)}
+function updateCount(){document.getElementById("count").textContent=cart.length}
+function openCart(){document.getElementById("modal").style.display="flex";document.getElementById("cartList").innerHTML=cart.length?cart.map(p=>`<div class="row"><span>${p.name}</span><strong>${p.price}</strong></div>`).join(""):`<p class="empty">Ton panier est vide.</p>`}
+function closeCart(){document.getElementById("modal").style.display="none"} function clearCart(){cart=[];updateCount();openCart()}
+if(window.Telegram?.WebApp){Telegram.WebApp.ready();Telegram.WebApp.expand()}init();
+</script></body></html>
