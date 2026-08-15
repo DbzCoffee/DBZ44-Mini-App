@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#160f0b" />
+  <title>Ma Boutique</title>
+
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    :root {
+      --bg: #120d0a;
+      --surface: #211712;
+      --surface-2: #281c16;
+      --border: rgba(255, 238, 218, .12);
+      --text: #fff5ec;
+      --muted: #aa9b90;
+      --accent: #ef6b4e;
+      --accent-soft: #ff9b69;
+      --gold: #f0c878;
+      --radius: 22px;
+      --nav-height: 76px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-height) + 24px);
+    }
+
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: max(18px, env(safe-area-inset-top)) 18px 16px;
+      background: rgba(18, 13, 10, .94);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      object-fit: cover;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .brand-name {
+      font-weight: 800;
+      font-size: 17px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .icon-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 21px;
+    }
+
+    main {
+      padding: 26px 18px 20px;
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .welcome {
+      margin: 8px 0 30px;
+      font-size: clamp(34px, 10vw, 58px);
+      line-height: .98;
+      font-weight: 900;
+      letter-spacing: -1.8px;
+    }
+
+    .welcome span {
+      color: var(--accent);
+      text-shadow: 0 0 24px rgba(239,107,78,.2);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 14px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -.5px;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .featured-row {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 6px;
+      margin: 0 -18px 28px;
+      padding-left: 18px;
+      padding-right: 18px;
+      scrollbar-width: none;
+    }
+
+    .featured-row::-webkit-scrollbar { display: none; }
+
+    .featured-card {
+      flex: 0 0 235px;
+      scroll-snap-align: start;
+    }
+
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    }
+
+    .featured-card .product-card {
+      height: 100%;
+    }
+
+    .product-image-wrap {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      background: #1b1410;
+      overflow: hidden;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .favorite {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(18, 13, 10, .78);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 19px;
+      backdrop-filter: blur(8px);
+    }
+
+    .favorite.active {
+      color: var(--accent-soft);
+    }
+
+    .product-body {
+      padding: 14px;
+    }
+
+    .product-name {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .product-meta {
+      margin-top: 8px;
+      color: var(--gold);
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .select-wrap {
+      position: relative;
+    }
+
+    .select-btn {
+      width: 100%;
+      min-height: 58px;
+      padding: 0 16px;
+      border-radius: 19px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .select-btn strong {
+      font-size: 15px;
+    }
+
+    .select-btn span {
+      color: var(--muted);
+      font-size: 20px;
+    }
+
+    .dropdown {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 8px);
+      z-index: 15;
+      background: #241914;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 7px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.4);
+      display: none;
+    }
+
+    .dropdown.open { display: block; }
+
+    .dropdown button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 13px 12px;
+      border-radius: 13px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .dropdown button:hover,
+    .dropdown button.selected {
+      background: rgba(239,107,78,.12);
+      color: var(--accent-soft);
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .products-grid .product-body {
+      min-height: 76px;
+    }
+
+    .empty {
+      grid-column: 1 / -1;
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    .contact-page {
+      display: none;
+    }
+
+    .contact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+    }
+
+    .contact-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .contact-card h2 {
+      margin: 0 0 10px;
+      font-size: 27px;
+    }
+
+    .contact-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 16px;
+    }
+
+    .telegram-link {
+      margin-top: 18px;
+      width: 100%;
+      min-height: 62px;
+      border-radius: 19px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .telegram-link .left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .telegram-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #2aabee;
+      font-size: 20px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      padding: 8px 18px max(8px, env(safe-area-inset-bottom));
+      background: rgba(27, 18, 14, .96);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .nav-btn {
+      border: 0;
+      background: transparent;
+      color: #746960;
+      min-height: 58px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .nav-btn .nav-icon {
+      font-size: 23px;
+      line-height: 1;
+    }
+
+    .nav-btn.active {
+      color: var(--accent);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--nav-height) + 20px);
+      transform: translate(-50%, 15px);
+      opacity: 0;
+      pointer-events: none;
+      background: #2a211c;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      transition: .22s ease;
+      z-index: 50;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (min-width: 700px) {
+      main { padding-left: 28px; padding-right: 28px; }
+      .featured-row {
+        margin-left: -28px;
+        margin-right: -28px;
+        padding-left: 28px;
+        padding-right: 28px;
+      }
+      .products-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <!-- REMPLACE cette image par ton logo -->
+        <img class="brand-logo" src="https://placehold.co/100x100/211712/fff5ec?text=LOGO" alt="Logo" />
+        <div>
+          <div class="brand-name" id="brandName">Ma Boutique</div>
+          <div class="brand-subtitle">Mini-boutique Telegram</div>
+        </div>
+      </div>
+      <button class="icon-btn" id="topContact" aria-label="Contact">✈️</button>
+    </header>
+
+    <main>
+      <!-- ACCUEIL -->
+      <section id="homePage">
+        <div class="eyebrow">BIENVENUE</div>
+        <h1 class="welcome"><span id="firstName">Bienvenue</span> 🏆</h1>
+
+        <div class="section-head">
+          <h2 class="section-title">⭐ Coups de cœur</h2>
+        </div>
+
+        <div class="featured-row" id="featuredRow"></div>
+
+        <div class="filters">
+          <div class="select-wrap">
+            <button class="select-btn" id="categoryBtn">
+              <strong id="categoryLabel">Catégories</strong>
+              <span>⌄</span>
+            </button>
+            <div class="dropdown" id="categoryDropdown"></div>
+          </div>
+
+          <div class="select-wrap">
+            <button class="select-btn" id="collectionBtn">
+              <strong id="collectionLabel">Collections</strong>
+              <span>⌄</span>
+            </button>
+            <div class="dropdown" id="collectionDropdown"></div>
+          </div>
+        </div>
+
+        <div class="section-head">
+          <h2 class="section-title">Nos produits</h2>
+          <span class="count" id="productCount">0 article</span>
+        </div>
+
+        <div class="products-grid" id="productsGrid"></div>
+      </section>
+
+      <!-- CONTACT -->
+      <section id="contactPage" class="contact-page">
+        <div class="contact-card">
+          <div class="contact-icon">💬</div>
+          <h2>Nous contacter</h2>
+          <p>
+            Une question sur un produit, une commande ou autre chose ?
+            Notre équipe te répond sur Telegram.
+          </p>
+
+          <!-- REMPLACE le username ci-dessous -->
+          <a
+            class="telegram-link"
+            id="contactLink"
+            href="https://t.me/TON_USERNAME"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="left">
+              <span class="telegram-logo">➤</span>
+              <span>Telegram</span>
+            </span>
+            <span>Écrire</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <div class="nav-inner">
+        <button class="nav-btn active" data-page="home">
+          <span class="nav-icon">⌂</span>
+          <span>Accueil</span>
+        </button>
+        <button class="nav-btn" data-page="contact">
+          <span class="nav-icon">➤</span>
+          <span>Contact</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /*
+      ============================================================
+      CATALOGUE — REMPLIS CETTE PARTIE MANUELLEMENT
+      ============================================================
+
+      Pour ajouter un produit, copie un bloc et modifie :
+      - name
+      - price
+      - image
+      - category
+      - collection
+      - description
+      - featured
+
+      "featured: true" => apparaît dans ⭐ Coups de cœur.
+
+      Pour les images, tu peux utiliser :
+      - une URL d'image
+      - ou plus tard remplacer par un chemin local, ex: "images/produit1.jpg"
+    */
+
+    const PRODUCTS = [
+      {
+        id: 1,
+        name: "Produit 01",
+        price: "50 €",
+        image: "https://placehold.co/800x800/2b211c/fff5ec?text=Produit+01",
+        category: "Catégorie 1",
+        collection: "Collection 1",
+        description: "Description du produit.",
+        featured: true
+      },
+      {
+        id: 2,
+        name: "Produit 02",
+        price: "60 €",
+        image: "https://placehold.co/800x800/30241e/fff5ec?text=Produit+02",
+        category: "Catégorie 2",
+        collection: "Collection 1",
+        description: "Description du produit.",
+        featured: true
+      },
+      {
+        id: 3,
+        name: "Produit 03",
+        price: "70 €",
+        image: "https://placehold.co/800x800/33271f/fff5ec?text=Produit+03",
+        category: "Catégorie 1",
+        collection: "Collection 2",
+        description: "Description du produit.",
+        featured: false
+      },
+      {
+        id: 4,
+        name: "Produit 04",
+        price: "80 €",
+        image: "https://placehold.co/800x800/2d231e/fff5ec?text=Produit+04",
+        category: "Catégorie 3",
+        collection: "Collection 2",
+        description: "Description du produit.",
+        featured: false
+      },
+      {
+        id: 5,
+        name: "Produit 05",
+        price: "90 €",
+        image: "https://placehold.co/800x800/34271f/fff5ec?text=Produit+05",
+        category: "Catégorie 2",
+        collection: "Collection 3",
+        description: "Description du produit.",
+        featured: false
+      },
+      {
+        id: 6,
+        name: "Produit 06",
+        price: "100 €",
+        image: "https://placehold.co/800x800/2c221d/fff5ec?text=Produit+06",
+        category: "Catégorie 3",
+        collection: "Collection 3",
+        description: "Description du produit.",
+        featured: false
+      }
+    ];
+
+    /*
+      ============================================================
+      CONFIGURATION
+      ============================================================
+    */
+
+    const CONFIG = {
+      shopName: "Ma Boutique",
+
+      // Mets ici le username Telegram de contact, sans @
+      contactUsername: "TON_USERNAME"
+    };
+
+    /*
+      ============================================================
+      APPLICATION
+      ============================================================
+    */
+
+    const tg = window.Telegram?.WebApp;
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+
+      // Permet à Telegram d'adapter l'interface à son thème si besoin.
+      if (tg.setHeaderColor) tg.setHeaderColor("#120d0a");
+      if (tg.setBackgroundColor) tg.setBackgroundColor("#120d0a");
+    }
+
+    const state = {
+      category: "Toutes",
+      collection: "Toutes",
+      favorites: JSON.parse(localStorage.getItem("favorites") || "[]")
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getUserFirstName() {
+      const user = tg?.initDataUnsafe?.user;
+
+      if (user?.first_name) return user.first_name;
+
+      return "Bienvenue";
+    }
+
+    function uniqueValues(key) {
+      return [...new Set(PRODUCTS.map(p => p[key]).filter(Boolean))];
+    }
+
+    function isFavorite(id) {
+      return state.favorites.includes(id);
+    }
+
+    function toggleFavorite(id) {
+      if (state.favorites.includes(id)) {
+        state.favorites = state.favorites.filter(item => item !== id);
+        showToast("Retiré des favoris");
+      } else {
+        state.favorites.push(id);
+        showToast("Ajouté aux favoris ❤️");
+      }
+
+      localStorage.setItem("favorites", JSON.stringify(state.favorites));
+      renderAll();
+    }
+
+    function filteredProducts() {
+      return PRODUCTS.filter(product => {
+        const categoryOk =
+          state.category === "Toutes" ||
+          product.category === state.category;
+
+        const collectionOk =
+          state.collection === "Toutes" ||
+          product.collection === state.collection;
+
+        return categoryOk && collectionOk;
+      });
+    }
+
+    function productCard(product, featured = false) {
+      return `
+        <article class="${featured ? "featured-card" : ""}">
+          <div class="product-card">
+            <div class="product-image-wrap">
+              <img
+                class="product-image"
+                src="${escapeHtml(product.image)}"
+                alt="${escapeHtml(product.name)}"
+                loading="lazy"
+              />
+              <button
+                class="favorite ${isFavorite(product.id) ? "active" : ""}"
+                onclick="toggleFavorite(${product.id})"
+                aria-label="Favori"
+              >
+                ${isFavorite(product.id) ? "♥" : "♡"}
+              </button>
+            </div>
+            <div class="product-body">
+              <h3 class="product-name">${escapeHtml(product.name)}</h3>
+              <div class="product-meta">Dès ${escapeHtml(product.price)}</div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderFeatured() {
+      const featured = PRODUCTS.filter(p => p.featured);
+      const container = $("#featuredRow");
+
+      if (!featured.length) {
+        container.innerHTML = `<div class="empty">Aucun coup de cœur pour le moment.</div>`;
+        return;
+      }
+
+      container.innerHTML = featured.map(p => productCard(p, true)).join("");
+    }
+
+    function renderProducts() {
+      const products = filteredProducts();
+      const container = $("#productsGrid");
+
+      $("#productCount").textContent =
+        `${products.length} ${products.length > 1 ? "articles" : "article"}`;
+
+      if (!products.length) {
+        container.innerHTML = `
+          <div class="empty">
+            Aucun produit ne correspond à ces filtres.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = products.map(p => productCard(p)).join("");
+    }
+
+    function renderDropdowns() {
+      const categories = ["Toutes", ...uniqueValues("category")];
+      const collections = ["Toutes", ...uniqueValues("collection")];
+
+      $("#categoryDropdown").innerHTML = categories.map(item => `
+        <button
+          class="${state.category === item ? "selected" : ""}"
+          onclick="selectCategory('${escapeJs(item)}')"
+        >
+          ${escapeHtml(item)}
+        </button>
+      `).join("");
+
+      $("#collectionDropdown").innerHTML = collections.map(item => `
+        <button
+          class="${state.collection === item ? "selected" : ""}"
+          onclick="selectCollection('${escapeJs(item)}')"
+        >
+          ${escapeHtml(item)}
+        </button>
+      `).join("");
+
+      $("#categoryLabel").textContent =
+        state.category === "Toutes" ? "Catégories" : state.category;
+
+      $("#collectionLabel").textContent =
+        state.collection === "Toutes" ? "Collections" : state.collection;
+    }
+
+    function escapeJs(value) {
+      return String(value).replaceAll("\\", "\\\\").replaceAll("'", "\\'");
+    }
+
+    function selectCategory(value) {
+      state.category = value;
+      closeDropdowns();
+      renderAll();
+    }
+
+    function selectCollection(value) {
+      state.collection = value;
+      closeDropdowns();
+      renderAll();
+    }
+
+    function closeDropdowns() {
+      document.querySelectorAll(".dropdown").forEach(el => el.classList.remove("open"));
+    }
+
+    function renderAll() {
+      renderFeatured();
+      renderProducts();
+      renderDropdowns();
+    }
+
+    function showPage(page) {
+      $("#homePage").style.display = page === "home" ? "block" : "none";
+      $("#contactPage").style.display = page === "contact" ? "block" : "none";
+
+      document.querySelectorAll(".nav-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.page === page);
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showToast(message) {
+      const toast = $("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+
+      clearTimeout(window.toastTimer);
+      window.toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1600);
+    }
+
+    // Navigation
+    document.querySelectorAll(".nav-btn").forEach(btn => {
+      btn.addEventListener("click", () => showPage(btn.dataset.page));
+    });
+
+    $("#topContact").addEventListener("click", () => showPage("contact"));
+
+    // Dropdowns
+    $("#categoryBtn").addEventListener("click", (event) => {
+      event.stopPropagation();
+      $("#categoryDropdown").classList.toggle("open");
+      $("#collectionDropdown").classList.remove("open");
+    });
+
+    $("#collectionBtn").addEventListener("click", (event) => {
+      event.stopPropagation();
+      $("#collectionDropdown").classList.toggle("open");
+      $("#categoryDropdown").classList.remove("open");
+    });
+
+    document.addEventListener("click", closeDropdowns);
+
+    // Configuration visuelle / identité
+    $("#brandName").textContent = CONFIG.shopName;
+
+    const contactLink = $("#contactLink");
+    contactLink.href = `https://t.me/${CONFIG.contactUsername}`;
+
+    $("#firstName").textContent = getUserFirstName();
+
+    renderAll();
+  </script>
+</body>
+</html>
